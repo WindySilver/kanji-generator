@@ -1,0 +1,44 @@
+--- Create the database using MariaDB ---
+
+CREATE DATABASE kanjilist;
+
+--- Create a user to login with from the software ---
+CREATE USER 'user'@'localhost' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON kanjilist.* TO 'user'@'localhost';
+
+Record these login details to .env file in the backend folder like this:
+
+user=user
+password=password
+
+--- Create the table ---
+
+USE kanjilist;
+
+CREATE TABLE kanji(
+kanji CHAR(1) PRIMARY KEY,
+translation TEXT,
+pronunciation_kun_yomi TEXT,
+pronunciation_on_yomi TEXT,
+jlpt INT);
+
+
+--- Check the table ---
+
+DESCRIBE kanji;
++------------------------+---------+------+-----+---------+-------+
+| Field                  | Type    | Null | Key | Default | Extra |
++------------------------+---------+------+-----+---------+-------+
+| kanji                  | char(1) | NO   | PRI | NULL    |       |
+| translation            | text    | YES  |     | NULL    |       |
+| pronunciation_kun_yomi | text    | YES  |     | NULL    |       |
+| pronunciation_on_yomi  | text    | YES  |     | NULL    |       |
+| jlpt                   | int(11) | YES  |     | NULL    |       |
++------------------------+---------+------+-----+---------+-------+
+
+
+--- Add the data (full dataset is WIP) ---
+
+INSERT INTO kanji (kanji, translation, pronunciation_kun_yomi, pronunciation_on_yomi, jlpt)
+VALUES('一', 'one, one radical (no.1)', 'ひと, ひと.つ, はじめ, てん, かづ, かつ, いる, まこと, かず, おさむ, か, かた, くに, さね, すすむ, たか, ただ, ち, のぶ, はじむ, ひ, ひじ, ひで, ひとし, まさし, もと, もろ, ひと-', 'イチ, イツ', '5'),
+('二', 'two, two radical (no.2)', 'ふた, ふた.つ, ふたた.び', 'ニ, ジ', '5');

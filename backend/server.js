@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import mariadb from 'mariadb';
+import { loadEnvFile } from "node:process";
 
 const app = express();
 
@@ -7,29 +9,61 @@ const CORS_OPTIONS = {
   origin: ["http://localhost:5173"]
 };
 
+// Loads environment variables from the default .env file
+loadEnvFile();
+//console.log(process.env);
+
 app.use(cors(CORS_OPTIONS));
 
+const pool = mariadb.createPool({
+    host: 'localhost',
+    port: 3306,
+    user: process.env.user,
+    password: process.env.password,
+    database: 'kanjilist',
+    connectionLimit: 5 // Adjust as needed
+});
 
-// Example data, will later be fetched from a database because this tech stack is so overtly complicated
+console.log("Connection pool created.");
+
+var kanjilist = [];
+
+async function executeDatabaseOperations() {
+    let conn;
+    try {
+        conn = await pool.getConnection(); // Get a connection from the pool
+
+        // --- SELECT Query ---
+        // TODO: Implement request parameters once there's UI for selecting them
+        const rows = await conn.query("SELECT * from kanji;");
+        console.log("Selected Rows:", rows);
+        kanjilist = rows;
+
+        // --- INSERT Query (with parameters for security) ---
+        // TODO: Find the easiest way to fill the database
+        //const res = await conn.query("INSERT INTO your_table_name (name, status) VALUES (?, ?)", ["New Entry", "pending"]);
+        //console.log("Insert Result:", res); // res will contain { affectedRows: 1, insertId: ..., warningStatus: 0 }
+
+    } catch (err) {
+        console.error("Database operation error:", err);
+        throw err; // Re-throw to handle higher up
+    } finally {
+        if (conn) {
+            conn.release(); // Release connection back to the pool
+            console.log("Connection released to pool.");
+        }
+    }
+}
+
 app.get("/", (req, res) => {
-  res.json({
-    kanjiList: [
-      {
-        kanji: "乙",
-        translation: "the latter, duplicate, strange, witty, fishhook radical (no. 5)",
-        pronunciation_kun_yomi: "きのと, おと, おと-",
-        pronunciation_on_yomi: "オツ, オチ, イツ",
-        JLPT: 1
-      },
-      {
-        kanji: "大",
-        translation: "large, big",
-        pronunciation_kun_yomi: "おお, おお.きい, おお.いに, もと, まさる, ひろし, はじめ, とも, たかし, おう, わ, うふ, -おお.いに, おお-",
-        pronunciation_on_yomi: "ダイ, ダ, タイ, タ",
-        JLPT: 5
-      }
-    ]
-  });
+
+  // Call the async function
+  executeDatabaseOperations()
+    .then(() => console.log("All database operations attempted."))
+    .catch((err) => console.error("Overall operation failed:", err))
+    .finally(() => {
+    res.json(kanjilist);
+    });
 });
 
 app.listen(8080, () => {

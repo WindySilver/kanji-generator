@@ -9,12 +9,12 @@ function App() {
         translation: string,
         pronunciation_kun_yomi: string,
         pronunciation_on_yomi: string,
-        JLPT: number
+        jlpt: number
 };
 
   const fetchkanjis = async () => {
     const response = await axios.get("http://localhost:8080");
-    setkanjis(response.data.kanjiList);
+    setkanjis(response.data);
   };
 
   useEffect(() => {
@@ -27,12 +27,12 @@ function App() {
         Kanji Generator
       </h1>
         {kanjiList.map((kanji) => (
-          <div>
+          <div key={kanji.kanji}>
             <h1>{kanji.kanji}</h1>
             <p>Translation(s): {kanji.translation}</p>
             <p>kun-yomi: {kanji.pronunciation_kun_yomi}</p>
             <p>on-yomi: {kanji.pronunciation_on_yomi}</p>
-            <p>JLPT level: {kanji.JLPT}</p>
+            <p>JLPT level: {kanji.jlpt}</p>
           </div>
         ))}
     </div>
