@@ -48,11 +48,43 @@ type showRenderProps = {
         }));
   }
 
-  const fetchkanjis = async () => {
-    const response = await axios.get("http://localhost:8080");
+  function KanjiGeneration(){
+  async function fetchkanjis  () {
+    let response = await axios.get("http://localhost:8080");
+    //TODO: Add selected JLPT levels to request
     setkanjis(response.data);
-  };
+  }
 
+  function KanjiList() {
+    if(kanjiList != null){
+        return(
+        <div>
+          {kanjiList.map((kanji) => (
+          <div key={kanji.kanji}>
+            <RenderKanjiData type='kanji' show={showSelection.kanji} data={kanji.kanji} />
+            <RenderKanjiData type='translation' show={showSelection.translation} data={kanji.translation} />
+            <RenderKanjiData type='pronunciation_kun_yomi' show={showSelection.pronunciation_kun_yomi} data={kanji.pronunciation_kun_yomi} />
+            <RenderKanjiData type='pronunciation_on_yomi' show={showSelection.pronunciation_on_yomi} data={kanji.pronunciation_on_yomi} />
+            <RenderKanjiData type='jlpt' show={showSelection.jlpt} data={kanji.jlpt} />
+          </div>
+        ))}
+        </div>)}
+    return null;
+}
+
+    return (
+      <div>
+      <div>
+        <button
+        disabled={!jlptSelection.five&&!jlptSelection.four&&!jlptSelection.three&&!jlptSelection.two&&!jlptSelection.one}
+        onClick={fetchkanjis}
+        >Generate kanji</button>
+      </div>
+      <KanjiList />
+        </div>
+
+    );
+  }
 
   function RenderKanjiData({type, show, data}: showRenderProps){
     if(show){
@@ -84,9 +116,9 @@ type showRenderProps = {
   }
 
 
-  useEffect(() => {
+ /* useEffect(() => {
     fetchkanjis();
-  }, []);
+  }, []);*/
 
   return (
     <div>
@@ -170,19 +202,9 @@ type showRenderProps = {
                 onChange={handleShowSelection}
             />
           <label>JLPT level</label>
-
       </div>
+      <KanjiGeneration />
 
-        {kanjiList.map((kanji) => (
-          <div key={kanji.kanji}>
-            <RenderKanjiData type='kanji' show={showSelection.kanji} data={kanji.kanji} />
-            <RenderKanjiData type='translation' show={showSelection.translation} data={kanji.translation} />
-            <RenderKanjiData type='pronunciation_kun_yomi' show={showSelection.pronunciation_kun_yomi} data={kanji.pronunciation_kun_yomi} />
-            <RenderKanjiData type='pronunciation_on_yomi' show={showSelection.pronunciation_on_yomi} data={kanji.pronunciation_on_yomi} />
-            <RenderKanjiData type='jlpt' show={showSelection.jlpt} data={kanji.jlpt} />
-
-          </div>
-        ))}
     </div>
   );
 }
