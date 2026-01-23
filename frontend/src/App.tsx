@@ -10,7 +10,12 @@ function App() {
         four: false,
         five: false
     });
-
+  const [showSelection, setShow] = useState<{ [key: string]: boolean }>({
+        kanji: false,
+        translation: false,
+        pronunciation_kun_yomi: false,
+        pronunciation_on_yomi: false
+    });
 
   interface Kanji {
         kanji: string,
@@ -23,6 +28,14 @@ function App() {
   const handleJLPTSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
         setJLPT((prevState) => ({
+            ...prevState,
+            [name]: checked
+        }));
+  }
+
+  const handleShowSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, checked } = e.target;
+        setShow((prevState) => ({
             ...prevState,
             [name]: checked
         }));
@@ -80,6 +93,39 @@ function App() {
                 onChange={handleJLPTSelection}
             />
           <label>1</label>
+      </div>
+
+      <div>
+        <p>Select kanji information to show: </p>
+        <input
+                type="checkbox"
+                name="kanji"
+                checked={showSelection.kanji}
+                onChange={handleShowSelection}
+            />
+          <label>kanji</label>
+        <input
+                type="checkbox"
+                name="translation"
+                checked={showSelection.translation}
+                onChange={handleShowSelection}
+            />
+          <label>translation</label>
+        <input
+                type="checkbox"
+                name="pronunciation_kun_yomi"
+                checked={showSelection.pronunciation_kun_yomi}
+                onChange={handleShowSelection}
+            />
+          <label>pronunciation (kun-yomi)</label>
+        <input
+                type="checkbox"
+                name="pronunciation_on_yomi"
+                checked={showSelection.pronunciation_on_yomi}
+                onChange={handleShowSelection}
+            />
+          <label>pronunciation (on-yomi)</label>
+
       </div>
 
         {kanjiList.map((kanji) => (
