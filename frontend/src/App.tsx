@@ -14,7 +14,8 @@ function App() {
         kanji: false,
         translation: false,
         pronunciation_kun_yomi: false,
-        pronunciation_on_yomi: false
+        pronunciation_on_yomi: false,
+        jlpt: false
     });
 
   interface Kanji {
@@ -24,6 +25,12 @@ function App() {
         pronunciation_on_yomi: string,
         jlpt: number
 };
+
+type showRenderProps = {
+  type: string,
+  show: boolean,
+  data: string | number
+}
 
   const handleJLPTSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -45,6 +52,37 @@ function App() {
     const response = await axios.get("http://localhost:8080");
     setkanjis(response.data);
   };
+
+
+  function RenderKanjiData({type, show, data}: showRenderProps){
+    if(show){
+      if (type == 'kanji'){
+        return <h1>{data}</h1>
+      }
+      else{
+        let text = '';
+        switch(type){
+          case 'translation':
+            text='Translation(s)';
+            break;
+          case  'pronunciation_kun_yomi':
+            text='kun-yomi';
+            break;
+          case 'pronunciation_on_yomi':
+            text='on-yomi';
+            break;
+          case 'jlpt':
+            text='JLPT level';
+            break;
+          default:
+            break;
+        }
+        return <p>{text}: {data}</p>
+      }
+    }
+    return null;
+  }
+
 
   useEffect(() => {
     fetchkanjis();
@@ -125,16 +163,24 @@ function App() {
                 onChange={handleShowSelection}
             />
           <label>pronunciation (on-yomi)</label>
+        <input
+                type="checkbox"
+                name="jlpt"
+                checked={showSelection.jlpt}
+                onChange={handleShowSelection}
+            />
+          <label>JLPT level</label>
 
       </div>
 
         {kanjiList.map((kanji) => (
           <div key={kanji.kanji}>
-            <h1>{kanji.kanji}</h1>
-            <p>Translation(s): {kanji.translation}</p>
-            <p>kun-yomi: {kanji.pronunciation_kun_yomi}</p>
-            <p>on-yomi: {kanji.pronunciation_on_yomi}</p>
-            <p>JLPT level: {kanji.jlpt}</p>
+            <RenderKanjiData type='kanji' show={showSelection.kanji} data={kanji.kanji} />
+            <RenderKanjiData type='translation' show={showSelection.translation} data={kanji.translation} />
+            <RenderKanjiData type='pronunciation_kun_yomi' show={showSelection.pronunciation_kun_yomi} data={kanji.pronunciation_kun_yomi} />
+            <RenderKanjiData type='pronunciation_on_yomi' show={showSelection.pronunciation_on_yomi} data={kanji.pronunciation_on_yomi} />
+            <RenderKanjiData type='jlpt' show={showSelection.jlpt} data={kanji.jlpt} />
+
           </div>
         ))}
     </div>

@@ -8,4 +8,5 @@ Grammar topics might be added as randomizer options in the future but for now th
 To run this:
 
 In the frontend folder: npm run dev
+
 In the backend folder: node server.js
