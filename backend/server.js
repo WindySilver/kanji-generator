@@ -27,15 +27,36 @@ const pool = mariadb.createPool({
 console.log("Connection pool created.");
 
 var kanjilist = [];
+var selectedLevels = [];
 
 async function executeDatabaseOperations() {
     let conn;
     try {
         conn = await pool.getConnection(); // Get a connection from the pool
 
+        let searchJLPTString = 'WHERE jlpt=\'';
+        let foundOne = false;
+        for(let i = 0;i<selectedLevels.length-1;i++){
+            if(selectedLevels[i]){
+                if(foundOne){
+                    searchJLPTString = searchJLPTString + ' OR jlpt=\'' + (i+1) + '\'';
+                }
+                else{
+                    searchJLPTString = searchJLPTString + (i+1) + '\'';
+                    foundOne = true;
+                }
+            }
+        }
+        if(selectedLevels[4]){
+            if(foundOne) searchJLPTString = searchJLPTString + ' OR jlpt=\''
+            searchJLPTString = searchJLPTString + 5 + '\'';
+        }
+        console.log(searchJLPTString)
+
+
         // --- SELECT Query ---
         // TODO: Implement request parameters once there's UI for selecting them
-        const rows = await conn.query("SELECT * from kanji;");
+        const rows = await conn.query("SELECT * from kanji " + searchJLPTString +";");
         console.log("Selected Rows:", rows);
         kanjilist = rows;
 
@@ -57,9 +78,9 @@ async function executeDatabaseOperations() {
 
 app.get("/", (req, res) => {
 
-    var selectedLevels = [req.query.one === 'true', req.query.two === 'true', req.query.three === 'true', req.query.four === 'true', req.query.five === 'true']
+    selectedLevels = [req.query.one === 'true', req.query.two === 'true', req.query.three === 'true', req.query.four === 'true', req.query.five === 'true']
     console.log(selectedLevels)
-    if(!selectedLevels[1] && !selectedLevels[0] && !selectedLevels[1] && !selectedLevels[2] && !selectedLevels[4]){
+    if(!selectedLevels[0] && !selectedLevels[1] && !selectedLevels[2] && !selectedLevels[3] && !selectedLevels[4]){
         res.status(400).send('No selected JLPT levels');
         return;
     }
