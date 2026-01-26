@@ -1,5 +1,6 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import axios, { AxiosError } from "axios";
+import { useState } from "react";
+import './App.css';
 
 function App() {
   const [kanjiList, setkanjis] = useState<Kanji[]>([]);
@@ -26,10 +27,18 @@ function App() {
         jlpt: number
 };
 
+  const [errorMess, setErrorMess] = useState<string>( '');
+  const [showRequestError, setReqError] = useState<boolean> (false);
+
 type showRenderProps = {
   type: string,
   show: boolean,
   data: string | number
+}
+
+type errorMessageProps = {
+  message: string,
+  show: boolean
 }
 
   const handleJLPTSelection = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,15 +59,33 @@ type showRenderProps = {
 
   function KanjiGeneration(){
   async function fetchkanjis  () {
-    let response = await axios.get("http://localhost:8080");
-    //TODO: Add selected JLPT levels to request
-    setkanjis(response.data);
+    try{
+    const response = await axios.get("http://localhost:8080", {
+          params: {
+                   one: jlptSelection.one,
+        two: jlptSelection.two,
+        three: jlptSelection.three,
+        four: jlptSelection.four,
+        five: jlptSelection.five
+          }
+        });
+    setReqError(false);
+    setErrorMess('')
+    setkanjis(response.data);}
+    catch (e){
+      const error = e as AxiosError;
+      setReqError(true)
+      if (error.response?.data) setErrorMess( error.response?.data.toString()); 
+      console.error(error.response?.data)
+      console.log(errorMess);
+    }
   }
 
   function KanjiList() {
-    if(kanjiList != null){
+    if(kanjiList.length > 0){
         return(
-        <div>
+        <div className="list">
+          <h2>Generated {kanjiList.length} kanji</h2>
           {kanjiList.map((kanji) => (
           <div key={kanji.kanji}>
             <RenderKanjiData type='kanji' show={showSelection.kanji} data={kanji.kanji} />
@@ -66,9 +93,11 @@ type showRenderProps = {
             <RenderKanjiData type='pronunciation_kun_yomi' show={showSelection.pronunciation_kun_yomi} data={kanji.pronunciation_kun_yomi} />
             <RenderKanjiData type='pronunciation_on_yomi' show={showSelection.pronunciation_on_yomi} data={kanji.pronunciation_on_yomi} />
             <RenderKanjiData type='jlpt' show={showSelection.jlpt} data={kanji.jlpt} />
+            <hr />
           </div>
         ))}
-        </div>)}
+        </div>)
+        }
     return null;
 }
 
@@ -79,6 +108,7 @@ type showRenderProps = {
         disabled={!jlptSelection.five&&!jlptSelection.four&&!jlptSelection.three&&!jlptSelection.two&&!jlptSelection.one}
         onClick={fetchkanjis}
         >Generate kanji</button>
+        <ErrorMessage message={errorMess} show={showRequestError} />
       </div>
       <KanjiList />
         </div>
@@ -109,25 +139,35 @@ type showRenderProps = {
           default:
             break;
         }
-        return <p>{text}: {data}</p>
+        return <p><span className="emphasis">{text}:</span> {data}</p>
       }
     }
     return null;
   }
 
+  function ErrorMessage({message, show}: errorMessageProps){
+    if (show){
+      return (
+            <div>
+            <br />
+            <b className="error">{message}</b>
+          </div>
+      )
+    }
+    
+    return null;
+  }
 
- /* useEffect(() => {
-    fetchkanjis();
-  }, []);*/
+
 
   return (
-    <div>
+    <div className="mainBody">
       <h1>
         Kanji Generator
       </h1>
 
       <div>
-        <p>Selected JLPT levels: </p>
+        <p className="emphasis">Selected JLPT levels: </p>
         <input
                 type="checkbox"
                 name="five"
@@ -166,7 +206,7 @@ type showRenderProps = {
       </div>
 
       <div>
-        <p>Select kanji information to show: </p>
+        <p className="emphasis">Select kanji information to show: </p>
         <input
                 type="checkbox"
                 name="kanji"
@@ -202,9 +242,11 @@ type showRenderProps = {
                 onChange={handleShowSelection}
             />
           <label>JLPT level</label>
+          <ErrorMessage message="You have not selected any data to show!"
+          show={!showSelection.kanji && !showSelection.translation && !showSelection.pronunciation_kun_yomi && !showSelection.pronunciation_on_yomi && !showSelection.jlpt}
+          />
       </div>
       <KanjiGeneration />
-
     </div>
   );
 }

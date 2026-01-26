@@ -57,8 +57,15 @@ async function executeDatabaseOperations() {
 
 app.get("/", (req, res) => {
 
+    var selectedLevels = [req.query.one === 'true', req.query.two === 'true', req.query.three === 'true', req.query.four === 'true', req.query.five === 'true']
+    console.log(selectedLevels)
+    if(!selectedLevels[1] && !selectedLevels[0] && !selectedLevels[1] && !selectedLevels[2] && !selectedLevels[4]){
+        res.status(400).send('No selected JLPT levels');
+        return;
+    }
+    
   // Call the async function
-  executeDatabaseOperations()
+  executeDatabaseOperations() //TODO: Send data from user (levels and number of kanji (which is TODO))
     .then(() => console.log("All database operations attempted."))
     .catch((err) => console.error("Overall operation failed:", err))
     .finally(() => {
