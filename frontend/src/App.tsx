@@ -3,6 +3,7 @@ import { useState } from "react";
 import './App.css';
 
 function App() {
+  const [howmany, setHowMany] = useState<number>(1);
   const [kanjiList, setkanjis] = useState<Kanji[]>([]);
   const [jlptSelection, setJLPT] = useState<{ [key: string]: boolean }>({
         one: false,
@@ -66,7 +67,8 @@ type errorMessageProps = {
         two: jlptSelection.two,
         three: jlptSelection.three,
         four: jlptSelection.four,
-        five: jlptSelection.five
+        five: jlptSelection.five,
+        howmany: howmany
           }
         });
     setReqError(false);
@@ -105,7 +107,7 @@ type errorMessageProps = {
       <div>
       <div>
         <button
-        disabled={!jlptSelection.five&&!jlptSelection.four&&!jlptSelection.three&&!jlptSelection.two&&!jlptSelection.one}
+        disabled={!jlptSelection.five&&!jlptSelection.four&&!jlptSelection.three&&!jlptSelection.two&&!jlptSelection.one||howmany<1}
         onClick={fetchkanjis}
         >Generate kanji</button>
         <ErrorMessage message={errorMess} show={showRequestError} />
@@ -246,6 +248,17 @@ type errorMessageProps = {
           show={!showSelection.kanji && !showSelection.translation && !showSelection.pronunciation_kun_yomi && !showSelection.pronunciation_on_yomi && !showSelection.jlpt}
           />
       </div>
+      <div>
+        <p className="emphasis">How many kanji should be generated: </p>
+        <input
+          type="number"
+          name="howmany"
+          onChange={e => setHowMany(Number(e.target.value))}
+          defaultValue={1}
+          min={1}
+          />
+          <ErrorMessage message="Improper value" show={howmany<=0} />
+        </div>
       <KanjiGeneration />
     </div>
   );

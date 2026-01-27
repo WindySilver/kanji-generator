@@ -27,9 +27,8 @@ const pool = mariadb.createPool({
 console.log("Connection pool created.");
 
 var kanjilist = [];
-var selectedLevels = [];
 
-async function executeDatabaseOperations() {
+async function executeDatabaseOperations(selectedLevels, howMany) {
     let conn;
     try {
         conn = await pool.getConnection(); // Get a connection from the pool
@@ -52,11 +51,12 @@ async function executeDatabaseOperations() {
             searchJLPTString = searchJLPTString + 5 + '\'';
         }
         console.log(searchJLPTString)
-
+        const finalQString = "SELECT * from kanji " + searchJLPTString +" ORDER BY RAND() LIMIT ?;"
+        console.log(finalQString)
 
         // --- SELECT Query ---
         // TODO: Implement request parameters once there's UI for selecting them
-        const rows = await conn.query("SELECT * from kanji " + searchJLPTString +";");
+        const rows = await conn.query(finalQString, [howMany]);
         console.log("Selected Rows:", rows);
         kanjilist = rows;
 
@@ -78,15 +78,20 @@ async function executeDatabaseOperations() {
 
 app.get("/", (req, res) => {
 
-    selectedLevels = [req.query.one === 'true', req.query.two === 'true', req.query.three === 'true', req.query.four === 'true', req.query.five === 'true']
-    console.log(selectedLevels)
+    const selectedLevels = [req.query.one === 'true', req.query.two === 'true', req.query.three === 'true', req.query.four === 'true', req.query.five === 'true']
+    const howMany = Number(req.query.howmany)
+    console.log(selectedLevels, howMany)
     if(!selectedLevels[0] && !selectedLevels[1] && !selectedLevels[2] && !selectedLevels[3] && !selectedLevels[4]){
         res.status(400).send('No selected JLPT levels');
         return;
     }
+    if(howMany < 1){
+        res.status(400).send('Improper kanji number request: ' + howMany);
+        return;
+    }
     
   // Call the async function
-  executeDatabaseOperations() //TODO: Send data from user (levels and number of kanji (which is TODO))
+  executeDatabaseOperations(selectedLevels, howMany)
     .then(() => console.log("All database operations attempted."))
     .catch((err) => console.error("Overall operation failed:", err))
     .finally(() => {
