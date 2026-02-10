@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import './App.css';
 
 function App() {
@@ -30,6 +30,7 @@ function App() {
 
   const [errorMess, setErrorMess] = useState<string>( '');
   const [showRequestError, setReqError] = useState<boolean> (false);
+  const [isDarkMode, setDarkMode] = useState(true);
 
 type showRenderProps = {
   type: string,
@@ -125,6 +126,16 @@ type errorMessageProps = {
     );
   }
 
+  function setMode(){
+    const root = document.body;
+    root!.classList.remove(isDarkMode ? "light" : "dark");
+    root!.classList.add(isDarkMode ? "dark" : "light");
+  }
+
+  useEffect (() => {
+    setMode();
+  })
+
   function RenderKanjiData({type, show, data}: showRenderProps){
     if(show){
       if (type == 'kanji'){
@@ -174,7 +185,9 @@ type errorMessageProps = {
       <h1>
         Kanji Generator
       </h1>
-
+      <button onClick={() => setDarkMode(!isDarkMode)}>
+      {isDarkMode ? '日' : '月'}
+      </button>
       <div>
         <p className="emphasis">Selected JLPT levels: </p>
         <input
