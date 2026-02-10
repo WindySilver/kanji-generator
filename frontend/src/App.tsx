@@ -58,6 +58,10 @@ type errorMessageProps = {
         }));
   }
 
+  function removeKanji (kanji: string) {
+    setkanjis(kanjiList.filter(kanjiL => kanjiL.kanji !== kanji));
+  }
+
   function KanjiGeneration(){
   async function fetchkanjis  () {
     try{
@@ -95,6 +99,9 @@ type errorMessageProps = {
             <RenderKanjiData type='pronunciation_kun_yomi' show={showSelection.pronunciation_kun_yomi} data={kanji.pronunciation_kun_yomi} />
             <RenderKanjiData type='pronunciation_on_yomi' show={showSelection.pronunciation_on_yomi} data={kanji.pronunciation_on_yomi} />
             <RenderKanjiData type='jlpt' show={showSelection.jlpt} data={kanji.jlpt} />
+            <button onClick={() => removeKanji(kanji.kanji)}>
+              Remove this one from the list
+            </button>
             <hr />
           </div>
         ))}
